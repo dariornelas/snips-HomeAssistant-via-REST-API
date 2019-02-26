@@ -41,16 +41,16 @@ def action_wrapper(hermes, intentMessage, conf):
         myDeviceName = intentMessage.slots.device_name.first().value
 # put this line back one once the bug is resolved: https://github.com/snipsco/snips-issues/issues/68
 #        myDeviceName = intentMessage.slots.device_name.first().raw_value 
-     header = {'x-ha-access': conf['secret']['haapipassword'], 'Content-Type': 'application/json'}
+     header = {'Authorization':'Bearer' + conf['secret']['token'], 'Content-Type': 'application/json'}
 
      if myState != "query":
        payload = json.dumps({"entity_id": myDeviceId})
-       url = 'http://'+ conf['secret']['haipaddress'] + ':' + conf['secret']['haport'] + '/api/services/homeassistant/turn_' + myState
-       response = post(url, headers=header, data=payload)
+       url = 'https://'+ conf['secret']['haipaddress'] + ':' + conf['secret']['haport'] + '/api/services/homeassistant/turn_' + myState
+       response = post(url, headers=header, data=payload, verify=False)
        hermes.publish_end_session(current_session_id, "Turning " + myState + " " + myDeviceName)
      else:
-       url = 'http://'+ conf['secret']['haipaddress'] + ':' + conf['secret']['haport'] + '/api/states/' + myDeviceId
-       response = get(url, headers=header)
+       url = 'https://'+ conf['secret']['haipaddress'] + ':' + conf['secret']['haport'] + '/api/states/' + myDeviceId
+       response = get(url, headers=header, verify=False)
        hermes.publish_end_session(current_session_id, myDeviceName + " is " + response.json()['state'])
     except:
        hermes.publish_end_session(current_session_id, "Sorry, something went wrong")
